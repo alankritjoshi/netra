@@ -1,4 +1,6 @@
 # netra
+> _Etymology. From Sanskrit नेत्र (netra, “eyes”)._
+
 This is Yet Another Issue Tracking Service!
 
 ## Prerequisites
