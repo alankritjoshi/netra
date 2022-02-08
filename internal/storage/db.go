@@ -2,7 +2,6 @@ package storage
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/pkg/errors"
 	"github.com/upper/db/v4"
@@ -16,18 +15,15 @@ type IssuesStore struct {
 	db.Collection
 }
 
-func (issues *IssuesStore) CreateIssue(issue IssueModel) (db.ID, error) {
-	log.Printf("reached db %s", issue.Title)
+func (issues *IssuesStore) CreateIssue(issue IssueModel) (string, error) {
 	res, err := issues.Insert(issue)
-	log.Print(res)
 	if err != nil {
-		return 0, errors.Wrap(err, "Insertion of issue failed")
+		return "", errors.Wrap(err, "Insertion of issue failed")
 	}
-	return res.ID(), nil
+	return fmt.Sprintf("%#v", res.ID()), nil
 }
 
 func (issues *IssuesStore) GetIssues() ([]IssueModel, error) {
-	log.Print("Inside db!")
 	issuesArr := []IssueModel{}
 	err := issues.Find().All(&issuesArr)
 	if err != nil {
@@ -37,7 +33,7 @@ func (issues *IssuesStore) GetIssues() ([]IssueModel, error) {
 }
 
 type IssueModel struct {
-	ID          uint   `db:"id,omitempty"`
+	ID          string `db:"id,omitempty"`
 	Title       string `db:"title"`
 	Description string `db:"description,omitempty"`
 }

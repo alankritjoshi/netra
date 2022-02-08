@@ -1,54 +1,89 @@
 package handler
 
 import (
-	"log"
 	"net/http"
+	"time"
 
 	"github.com/alankritjoshi/netra/internal/storage"
+	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/render"
 
 	api "github.com/alankritjoshi/netra/api/v1"
 )
 
-func NewIssueHandler(issuesStore *storage.IssuesStore) *IssueHandler {
-	return &IssueHandler{
+func NewIssuesHandler(issuesStore *storage.IssuesStore) *IssuesHandler {
+	return &IssuesHandler{
 		issuesStore: issuesStore,
 	}
 }
 
-type IssueHandler struct {
+type IssuesHandler struct {
 	issuesStore *storage.IssuesStore
 }
 
-func (handler *IssueHandler) CreateIssue(w http.ResponseWriter, r *http.Request) {
-	data := &api.CreateIssueRequest{}
-	log.Print("reached handler1")
+func (h *IssuesHandler) Routes() chi.Router {
+	r := chi.NewRouter()
+
+	r.Use(middleware.RequestID)
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+	r.Use(middleware.Timeout(60 * time.Second))
+
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Hello, world!"))
+	})
+
+	r.Route("/issues", func(r chi.Router) {
+		r.Get("/", h.GetIssues)
+		r.Post("/", h.CreateIssue)
+	})
+
+	return r
+}
+
+func (h *IssuesHandler) CreateIssue(w http.ResponseWriter, r *http.Request) {
+	data := &api.IssueRequest{}
 	if err := render.Bind(r, data); err != nil {
 		render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
-	log.Print("reached handler")
 	issue := storage.IssueModel{
 		Title:       data.Issue.Title,
 		Description: data.Issue.Description,
 	}
-	log.Printf("reached handler %s", issue.Title)
-	id, err := handler.issuesStore.CreateIssue(issue)
+	id, err := h.issuesStore.CreateIssue(issue)
 	if err != nil {
 		render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
-	log.Printf("Id %s", id)
+	data.Issue.ID = id
 	render.Status(r, http.StatusCreated)
-	render.Render(w, r, &api.CreateIssueResponse{Issue: data.Issue})
+	render.Render(w, r, &api.IssueResponse{Issue: data.Issue})
 }
 
-func (handler *IssueHandler) GetIssues(w http.ResponseWriter, r *http.Request) {
-	log.Print("Inside handler!")
+func (h *IssuesHandler) GetIssues(w http.ResponseWriter, r *http.Request) {
 	list := []render.Renderer{}
-	issuesModels, _ := handler.issuesStore.GetIssues()
+	issuesModels, _ := h.issuesStore.GetIssues()
 	for i := range issuesModels {
-		list = append(list, &api.CreateIssueResponse{
+		list = append(list, &api.IssueResponse{
+			Issue: &api.Issue{
+				ID:          issuesModels[i].ID,
+				Title:       issuesModels[i].Title,
+				Description: issuesModels[i].Description,
+			}})
+	}
+	if err := render.RenderList(w, r, list); err != nil {
+		render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+}
+
+func (h *IssuesHandler) SearchIssue(w http.ResponseWriter, r *http.Request) {
+	list := []render.Renderer{}
+	issuesModels, _ := h.issuesStore.GetIssues()
+	for i := range issuesModels {
+		list = append(list, &api.IssueResponse{
 			Issue: &api.Issue{
 				ID:          issuesModels[i].ID,
 				Title:       issuesModels[i].Title,

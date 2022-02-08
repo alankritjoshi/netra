@@ -4,14 +4,13 @@ import (
 	"log"
 
 	"github.com/alankritjoshi/netra/api/server"
-	"github.com/alankritjoshi/netra/internal/handler"
 	"github.com/alankritjoshi/netra/internal/storage"
 	"github.com/upper/db/v4/adapter/cockroachdb"
 )
 
 // The settings variable stores connection details.
 var settings = cockroachdb.ConnectionURL{
-	Host:     "localhost",
+	Host:     "cockroachdb",
 	Database: "netra",
 	User:     "netra",
 	Options: map[string]string{
@@ -27,11 +26,12 @@ func main() {
 	}
 	defer sess.Close()
 
-	issuesStore := storage.GetIssuesStore(sess)
+	issueServer := server.NewIssuesServer(
+		&server.Config{},
+		storage.GetIssuesStore(sess),
+	)
 
-	issueHandler := handler.NewIssueHandler(issuesStore)
-
-	issueServer := server.NewIssueServer(&server.Config{}, issueHandler)
+	log.Println("Server started...")
 
 	if err := issueServer.ListenAndServe(); err != nil {
 		log.Fatal("Issue Server: ", err)

@@ -7,42 +7,27 @@ import (
 )
 
 type Issue struct {
-	ID          uint   `json:"id"`
+	ID          string `json:"id"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
 }
 
-type CreateIssueRequest struct {
+type IssueRequest struct {
 	*Issue
 }
 
-func (request *CreateIssueRequest) Bind(r *http.Request) error {
+func (request *IssueRequest) Bind(r *http.Request) error {
 	if request.Issue == nil {
 		return errors.New("Missing required Issue fields.")
 	}
 	return nil
 }
 
-type CreateIssueResponse struct {
+type IssueResponse struct {
 	*Issue
 }
 
-func (response *CreateIssueResponse) Render(w http.ResponseWriter, r *http.Request) error {
-	return nil
-}
-
-type GetIssuesRequest struct {
-}
-
-func (request *GetIssuesRequest) Bind(r *http.Request) error {
-	return nil
-}
-
-type GetIssuesResponse struct {
-	Issues []*Issue
-}
-
-func (response *GetIssuesResponse) Render(w http.ResponseWriter, r *http.Request) error {
+func (response *IssueResponse) Render(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 

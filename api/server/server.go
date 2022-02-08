@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/alankritjoshi/netra/internal/handler"
+	"github.com/alankritjoshi/netra/internal/storage"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
 	"github.com/pkg/errors"
@@ -19,19 +20,19 @@ type Server interface {
 	ListenAndServe() error
 }
 
-func NewIssueServer(cfg *Config, handler *handler.IssueHandler) *IssueServer {
-	return &IssueServer{
-		cfg:     cfg,
-		handler: handler,
+func NewIssuesServer(cfg *Config, store *storage.IssuesStore) *IssuesServer {
+	return &IssuesServer{
+		cfg:   cfg,
+		store: store,
 	}
 }
 
-type IssueServer struct {
-	cfg     *Config
-	handler *handler.IssueHandler
+type IssuesServer struct {
+	cfg   *Config
+	store *storage.IssuesStore
 }
 
-func (server *IssueServer) ListenAndServe() error {
+func (server *IssuesServer) ListenAndServe() error {
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
@@ -43,10 +44,7 @@ func (server *IssueServer) ListenAndServe() error {
 		w.Write([]byte("Hello, world!"))
 	})
 
-	r.Route("/issues", func(r chi.Router) {
-		r.Get("/", server.handler.GetIssues)
-		r.Post("/", server.handler.CreateIssue)
-	})
+	r.Mount("/issues", handler.NewIssuesHandler(server.store).Routes())
 
 	err := http.ListenAndServe(":3000", r)
 	if err != nil {
