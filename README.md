@@ -6,7 +6,7 @@ This is Yet Another Issue Tracking Service!
 - docker-compose
 - make
 ## Get Started
-- make build && make run
+- `make build && make run`
 - Access API at localhost:3000
 - Access CockroachDB at localhost:8080
 
