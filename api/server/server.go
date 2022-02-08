@@ -20,16 +20,16 @@ type Server interface {
 	ListenAndServe() error
 }
 
-func NewIssuesServer(cfg *Config, store *storage.IssuesStore) *IssuesServer {
+func NewIssuesServer(cfg *Config, issuesStore storage.Store) *IssuesServer {
 	return &IssuesServer{
-		cfg:   cfg,
-		store: store,
+		cfg:         cfg,
+		issuesStore: issuesStore,
 	}
 }
 
 type IssuesServer struct {
-	cfg   *Config
-	store *storage.IssuesStore
+	cfg         *Config
+	issuesStore storage.Store
 }
 
 func (server *IssuesServer) ListenAndServe() error {
@@ -44,7 +44,7 @@ func (server *IssuesServer) ListenAndServe() error {
 		w.Write([]byte("Hello, world!"))
 	})
 
-	r.Mount("/issues", handler.NewIssuesHandler(server.store).Routes())
+	r.Mount("/issues", handler.NewIssuesHandler(server.issuesStore).Routes())
 
 	err := http.ListenAndServe(":3000", r)
 	if err != nil {

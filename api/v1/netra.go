@@ -10,6 +10,7 @@ type Issue struct {
 	ID          string `json:"id"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
+	Priority    uint   `json:"priority"`
 }
 
 type IssueRequest struct {

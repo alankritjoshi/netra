@@ -5,6 +5,7 @@ import (
 
 	"github.com/alankritjoshi/netra/api/server"
 	"github.com/alankritjoshi/netra/internal/storage"
+	"github.com/upper/db/v4"
 	"github.com/upper/db/v4/adapter/cockroachdb"
 )
 
@@ -20,6 +21,8 @@ var settings = cockroachdb.ConnectionURL{
 }
 
 func main() {
+	db.LC().SetLevel(db.LogLevelDebug)
+
 	sess, err := cockroachdb.Open(settings)
 	if err != nil {
 		log.Fatal("cockroachdb.Open: ", err)
