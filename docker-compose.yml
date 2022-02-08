@@ -1,0 +1,39 @@
+version: '3'
+services:
+  db:
+    image: cockroachdb/cockroach
+    container_name: cockroachdb
+    ports:
+      - "26257:26257"
+      - "8080:8080"
+    expose:
+      - "8080"
+      - "26257"
+    volumes:
+     - ./:/var/lib/cockroach
+    command: start-single-node --insecure
+
+  db-init:
+    image: cockroachdb/cockroach
+    depends_on:
+      - db
+    volumes:
+      - ./setup_db.sh:/setup_db.sh
+    entrypoint: "/bin/bash"
+    command: /setup_db.sh
+
+  app:
+    container_name: netra
+    image: netra
+    ports:
+      - 3000:3000
+    links:
+      - db
+    depends_on:
+      - db-init
+    environment:
+      - "DB_PORT=26257"
+      - "DB_HOST=cockroachdb"
+      - "DB_NAME=netra"
+      - "DB_USER=netra"
+    restart: on-failure
