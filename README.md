@@ -22,9 +22,9 @@ This is Yet Another Issue Tracking Service!
 - Database adapter is upper.io
   - Simpler to use and handy mechanisms of running ORM-like queries, SQL builders or plain SQL
   - Integrates with almost every major DB
-- Choice of DB
-  - CockroachDB, a SQL database, was chosen for this dev project to showcase API design. In the usual case, each org with their set of users will be accessing a private set of issues. In this case, each org can be issued a SQL database
-  - Based on deployment strategy for the service, for example, if issue is a global concept for all users (like GitHub issues), it won't be scalable to deploy in a SQL database. A distributed NoSQL database like DynamoDB might be better  
+- ~~Choice of DB~~ This entire section is so inaccurate as CockroachDB is not a typical SQL database. It's a robust Google Spanner-sequel that works like a geodistributed quorum based distributed database with SQL APIs. Internally, each node uses a NoSQL database engine. This should scale horizontally too, however, for this problem we will be underutilizing its complex join/transactional capabilities. CockroachDB is usually preferred for an even distribution of READ/WRITE traffic
+  - ~~CockroachDB, a SQL database, was chosen for this dev project to showcase API design. In the usual case, each org with their set of users will be accessing a private set of issues. In this case, each org can be issued a SQL database~~
+  - ~~Based on deployment strategy for the service, for example, if issue is a global concept for all users (like GitHub issues), it won't be scalable to deploy in a SQL database. A distributed NoSQL database like DynamoDB might be better~~
 ## TODO/Improvements
 - Update API: I didn't have time to make it for any good use
 - Docs: I didn't have time due to work commitments so I blazed past the code
